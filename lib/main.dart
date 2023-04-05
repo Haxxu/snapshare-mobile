@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
             title: 'Snap Share',
             theme: appTheme,
             home: authManager.isAuth
-                ? const Text('is Auth')
+                ? MainLayout()
                 : FutureBuilder(
                     future: authManager.tryAutoLogin(),
                     builder: (ctx, snapshot) {
