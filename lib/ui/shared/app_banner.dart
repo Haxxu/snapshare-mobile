@@ -15,10 +15,10 @@ class AppBanner extends StatelessWidget {
         vertical: 8.0,
         horizontal: 94.0,
       ),
-      transform: Matrix4.rotationZ(-8 * pi / 180)..translate(-10.0),
+      // transform: Matrix4.rotationZ(-8 * pi / 180)..translate(-10.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        color: Color.fromARGB(255, 110, 32, 9),
+        color: const Color.fromARGB(255, 110, 32, 9),
         boxShadow: const [
           BoxShadow(
             blurRadius: 8,
@@ -31,7 +31,7 @@ class AppBanner extends StatelessWidget {
         'Snap Share',
         style: TextStyle(
           color: Theme.of(context).textTheme.titleLarge?.color,
-          fontSize: 30,
+          fontSize: 35,
           fontFamily: 'Anton',
           fontWeight: FontWeight.normal,
         ),
