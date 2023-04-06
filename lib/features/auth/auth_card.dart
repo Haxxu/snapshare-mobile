@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:snapshare_mobile/features/auth/auth_manager.dart';
+import 'package:snapshare_mobile/providers/auth_manager.dart';
 import 'package:snapshare_mobile/features/shared/dialog_utils.dart';
 
 enum AuthMode { login, register }

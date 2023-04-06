@@ -39,7 +39,8 @@ class Post {
       title: map['title'] ?? '',
       image: map['image'] ?? '',
       description: map['description'] ?? '',
-      owner: map['owner'] != null ? User.fromMap(map['owner']) : null,
+      // owner: map['owner'] != null ? User.fromMap(map['owner']) : null,
+      owner: User.fromMap(map['owner']),
       likes: List<Map<String, dynamic>>.from(
         map['likes']?.map(
           (x) => Map<String, dynamic>.from(x),

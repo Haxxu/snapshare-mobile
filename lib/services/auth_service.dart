@@ -9,6 +9,7 @@ import 'package:http/http.dart' as http;
 
 import 'package:snapshare_mobile/models/auth_token.dart';
 import 'package:snapshare_mobile/models/http_exception.dart';
+import 'package:snapshare_mobile/models/user.dart';
 import 'package:snapshare_mobile/screens/screens.dart';
 
 class AuthService {
@@ -148,7 +149,7 @@ class AuthService {
     prefs.remove(_xAuthTokenKey);
   }
 
-  void getUserData(BuildContext context) async {
+  Future<User?> getUserData(BuildContext context) async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString(_xAuthTokenKey);
@@ -166,6 +167,8 @@ class AuthService {
           // ignore: use_build_context_synchronously
           Provider.of<AuthManager>(context, listen: false);
       authManager.setUser(jsonEncode(jsonDecode(userRes.body)['data']));
+
+      return User.fromJson(jsonEncode(jsonDecode(userRes.body)['data']));
     } catch (e) {
       print(e);
     }

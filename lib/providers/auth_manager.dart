@@ -8,7 +8,6 @@ class AuthManager with ChangeNotifier {
   AuthToken? _authToken;
   String? _xAuthToken;
   User? _user;
-  String? test;
 
   final AuthService _authService = AuthService();
 
@@ -29,7 +28,7 @@ class AuthManager with ChangeNotifier {
   // }
 
   bool get isAuth {
-    return xAuthToken != null;
+    return _xAuthToken != null;
   }
 
   // void _setAuthToken(AuthToken token) {
@@ -70,8 +69,9 @@ class AuthManager with ChangeNotifier {
 
   Future<void> logout() async {
     _xAuthToken = null;
-    notifyListeners();
     _authService.clearSavedAuthToken();
+    notifyListeners();
+    print(_xAuthToken);
   }
 
   Future<bool> tryAutoLogin() async {
