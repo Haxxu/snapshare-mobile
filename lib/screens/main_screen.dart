@@ -1,24 +1,28 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:snapshare_mobile/services/auth_service.dart';
 import 'package:snapshare_mobile/utils/colors.dart';
 
 import 'package:snapshare_mobile/utils/global_variables.dart';
 
-class MainLayout extends StatefulWidget {
-  const MainLayout({super.key});
+class MainScreen extends StatefulWidget {
+  static const routeName = '/main';
+  const MainScreen({super.key});
 
   @override
-  State<MainLayout> createState() => _MainLayoutState();
+  State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainLayoutState extends State<MainLayout> {
+class _MainScreenState extends State<MainScreen> {
   int _page = 0;
   late PageController pageController;
+  AuthService authService = AuthService();
 
   @override
   void initState() {
     super.initState();
     pageController = PageController();
+    authService.getUserData(context);
   }
 
   @override

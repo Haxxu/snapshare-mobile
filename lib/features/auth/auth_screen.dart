@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:snapshare_mobile/ui/auth/auth_card.dart';
-import 'package:snapshare_mobile/ui/shared/app_banner.dart';
+
+import 'package:snapshare_mobile/features/auth/auth_card.dart';
+import 'package:snapshare_mobile/features/shared/app_banner.dart';
 
 class AuthScreen extends StatelessWidget {
   const AuthScreen({super.key});

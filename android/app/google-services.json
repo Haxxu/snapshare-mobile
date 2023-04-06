@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1092465858581",
+    "project_id": "snapshare-b4e7d",
+    "storage_bucket": "snapshare-b4e7d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1092465858581:android:e91a2a71a5a53405f5961c",
+        "android_client_info": {
+          "package_name": "com.example.snapshare_mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1092465858581-sd8vneh4tq9kh6ev72j33rb8svnjuq3r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDyjjU3zYAmETTEklrkIwHRLJ2Pqx5-vxI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1092465858581-sd8vneh4tq9kh6ev72j33rb8svnjuq3r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

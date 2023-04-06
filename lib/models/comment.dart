@@ -1,22 +1,21 @@
 import 'dart:convert';
+
 import './user.dart';
 
-class Post {
+class Comment {
   final String id;
-  final String title;
+  final String content;
   final User? owner;
-  final String image;
-  final String description;
+  final String post;
   final List<dynamic>? likes;
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  Post({
+  Comment({
     required this.id,
-    required this.title,
+    required this.content,
     required this.owner,
-    required this.image,
-    required this.description,
+    required this.post,
     required this.createdAt,
     required this.updatedAt,
     this.likes,
@@ -24,21 +23,19 @@ class Post {
 
   Map<String, dynamic> toMap() => {
         'id': id,
-        'title': title,
+        'content': content,
         'owner': owner,
-        'image': image,
-        'description': description,
+        'post': post,
         'likes': likes,
         'createdAt': createdAt,
         'updatedAt': updatedAt,
       };
 
-  factory Post.fromMap(Map<String, dynamic> map) {
-    return Post(
+  factory Comment.fromMap(Map<String, dynamic> map) {
+    return Comment(
       id: map['_id'] ?? '',
-      title: map['title'] ?? '',
-      image: map['image'] ?? '',
-      description: map['description'] ?? '',
+      content: map['content'] ?? '',
+      post: map['post'] ?? '',
       owner: map['owner'] != null ? User.fromMap(map['owner']) : null,
       likes: List<Map<String, dynamic>>.from(
         map['likes']?.map(
@@ -52,7 +49,7 @@ class Post {
 
   String toJson() => json.encode(toMap());
 
-  factory Post.fromJson(String source) {
-    return Post.fromMap(json.decode(source));
+  factory Comment.fromJson(String source) {
+    return Comment.fromMap(json.decode(source));
   }
 }
