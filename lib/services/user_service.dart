@@ -53,4 +53,35 @@ class UserService {
 
     return user;
   }
+
+  Future<User?> getUserById({
+    required BuildContext context,
+    required String userId,
+  }) async {
+    final String token =
+        Provider.of<AuthManager>(context, listen: false).xAuthToken ?? '';
+    User? user;
+
+    try {
+      http.Response res =
+          await http.get(Uri.parse(getUserByIdUrl(userId)), headers: {
+        'Content-Type': 'application/json; charset=UTF-8',
+        'x-auth-token': token,
+      });
+
+      httpErrorHandle(
+        response: res,
+        context: context,
+        onSuccess: () {
+          // user = User.fromJson(jsonEncode(jsonDecode(res.body)['data']));
+          user = User.fromMap(jsonDecode(res.body)['data']['user']);
+        },
+      );
+    } catch (e) {
+      print(e);
+      // showSnackBar(context, e.toString());
+    }
+
+    return user;
+  }
 }

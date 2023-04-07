@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:snapshare_mobile/features/home/home_screen.dart';
 import 'package:snapshare_mobile/features/user/edit_user_screen.dart';
 import 'package:snapshare_mobile/screens/screens.dart';
 
@@ -11,6 +12,10 @@ Route<dynamic> generateRoute(RouteSettings routeSettings) {
     case MainScreen.routeName:
       return MaterialPageRoute(
           settings: routeSettings, builder: (_) => const MainScreen());
+
+    case HomeScreen.routeName:
+      return MaterialPageRoute(
+          settings: routeSettings, builder: (_) => const HomeScreen());
 
     case EditUserScreen.routeName:
       return MaterialPageRoute(

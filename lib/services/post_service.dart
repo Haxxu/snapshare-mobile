@@ -81,20 +81,177 @@ class PostService {
           }
         },
       );
-
-      // Map<String, dynamic> jsonBody = jsonDecode(res.body);
-
-      // List<dynamic> postList = jsonBody['data'];
-
-      // List<Post> posts = postList.map((json) => Post.fromJson(json)).toList();
-      // print(posts);
-
-      // return postList;
     } catch (e) {
       print(e);
       showSnackBar(context, e.toString());
     }
 
     return postList;
+  }
+
+  Future<List<Post>> getHomePagePosts({
+    required BuildContext context,
+  }) async {
+    final String token =
+        Provider.of<AuthManager>(context, listen: false).xAuthToken ?? '';
+    final String userId =
+        Provider.of<AuthManager>(context, listen: false).user!.id;
+    List<Post> postList = [];
+
+    try {
+      final uri = Uri.parse(getRandomPostsUrl());
+      final queryParams = {
+        'tags': ["random"],
+        'limit': '3'
+      };
+      final uriWithQueryParams = uri.replace(queryParameters: queryParams);
+
+      http.Response res = await http.get(
+        uriWithQueryParams,
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-auth-token': token,
+        },
+      );
+
+      httpErrorHandle(
+        response: res,
+        context: context,
+        onSuccess: () {
+          // print(jsonEncode(jsonDecode(res.body)['data']));
+          List<dynamic> data = jsonDecode(res.body)['data']['random'];
+          for (int i = 0; i < data.length; ++i) {
+            // print(jsonEncode(data[i]['owner']));
+            Post p = Post.fromJson(jsonEncode(data[i]));
+            postList.add(p);
+          }
+        },
+      );
+
+      final uri1 = Uri.parse(getFollowingUsersPostsByUserIdUrl(userId));
+      final queryParams1 = {'limit': '2'};
+      final uriWithQueryParams1 = uri1.replace(queryParameters: queryParams1);
+
+      http.Response res1 = await http.get(
+        uriWithQueryParams1,
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-auth-token': token,
+        },
+      );
+
+      httpErrorHandle(
+        response: res1,
+        context: context,
+        onSuccess: () {
+          // print(jsonEncode(jsonDecode(res.body)['data']));
+          List<dynamic> data = jsonDecode(res1.body)['data'];
+          for (int i = 0; i < data.length; ++i) {
+            // print(jsonEncode(data[i]['owner']));
+            Post p = Post.fromJson(jsonEncode(data[i]));
+            postList.add(p);
+          }
+        },
+      );
+    } catch (e) {
+      print(e);
+      showSnackBar(context, e.toString());
+    }
+
+    postList.shuffle();
+    return postList;
+  }
+
+  Future<bool> checkLikedPost({
+    required BuildContext context,
+    required String postId,
+  }) async {
+    final String token =
+        Provider.of<AuthManager>(context, listen: false).xAuthToken ?? '';
+    bool isLiked = false;
+
+    try {
+      http.Response res = await http.get(
+        Uri.parse(checkLikedPostUrl(postId)),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-auth-token': token,
+        },
+      );
+
+      httpErrorHandle(
+        response: res,
+        context: context,
+        onSuccess: () {
+          // print(jsonEncode(jsonDecode(res.body)['data']));
+          isLiked = jsonDecode(res.body)['data'];
+        },
+      );
+    } catch (e) {
+      print(e);
+      showSnackBar(context, e.toString());
+    }
+
+    return isLiked;
+  }
+
+  void likePost({
+    required BuildContext context,
+    required String postId,
+  }) async {
+    final String token =
+        Provider.of<AuthManager>(context, listen: false).xAuthToken ?? '';
+
+    try {
+      http.Response res = await http.put(
+        Uri.parse(likePostUrl(postId)),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-auth-token': token,
+        },
+        body: jsonEncode({
+          'post': postId,
+        }),
+      );
+
+      httpErrorHandle(
+        response: res,
+        context: context,
+        onSuccess: () {},
+      );
+    } catch (e) {
+      print(e);
+      showSnackBar(context, e.toString());
+    }
+  }
+
+  void unlikePost({
+    required BuildContext context,
+    required String postId,
+  }) async {
+    final String token =
+        Provider.of<AuthManager>(context, listen: false).xAuthToken ?? '';
+
+    try {
+      http.Response res = await http.delete(
+        Uri.parse(unlikePostUrl(postId)),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-auth-token': token,
+        },
+        body: jsonEncode({
+          'post': postId,
+        }),
+      );
+
+      httpErrorHandle(
+        response: res,
+        context: context,
+        onSuccess: () {},
+      );
+    } catch (e) {
+      print(e);
+      showSnackBar(context, e.toString());
+    }
   }
 }

@@ -34,7 +34,7 @@ class User {
         'image': image,
         'description': description,
         'followers': followers,
-        'follwing': following,
+        'following': following,
         'liked_posts': likedPosts,
         'saved_posts': savedPosts,
         'createdAt': createdAt,
@@ -58,16 +58,20 @@ class User {
           (x) => Map<String, dynamic>.from(x),
         ),
       ),
-      likedPosts: List<Map<String, dynamic>>.from(
-        map['liked_posts']?.map(
-          (x) => Map<String, dynamic>.from(x),
-        ),
-      ),
-      savedPosts: List<Map<String, dynamic>>.from(
-        map['saved_posts']?.map(
-          (x) => Map<String, dynamic>.from(x),
-        ),
-      ),
+      likedPosts: map['liked_posts'] == null
+          ? null
+          : List<Map<String, dynamic>>.from(
+              map['liked_posts']?.map(
+                (x) => Map<String, dynamic>.from(x),
+              ),
+            ),
+      savedPosts: map['saved_posts'] == null
+          ? null
+          : List<Map<String, dynamic>>.from(
+              map['saved_posts']?.map(
+                (x) => Map<String, dynamic>.from(x),
+              ),
+            ),
       createdAt: DateTime.parse(map['createdAt']),
       updatedAt: DateTime.parse(map['updatedAt']),
     );
