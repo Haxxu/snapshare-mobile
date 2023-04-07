@@ -69,6 +69,7 @@ class AuthManager with ChangeNotifier {
 
   Future<void> logout() async {
     _xAuthToken = null;
+    _user = null;
     _authService.clearSavedAuthToken();
     notifyListeners();
     print(_xAuthToken);

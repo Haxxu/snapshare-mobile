@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:snapshare_mobile/features/user/edit_user_screen.dart';
 import 'package:snapshare_mobile/models/post.dart';
 import 'package:snapshare_mobile/models/user.dart';
 import 'package:snapshare_mobile/screens/screens.dart';
@@ -21,7 +22,6 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   User? user;
   List<Post>? posts;
-  int? totalPosts;
   bool _isLoading = false;
 
   @override
@@ -42,12 +42,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       user = await authService.getUserData(context);
 
-      totalPosts = await postService.getNumbersOfPostsByUserId(
+      posts = await postService.getPostsByUserId(
           context: context, userId: user!.id);
 
-      // print(posts![0]);
+      // print(posts![1].owner);
     } catch (e) {
-      print(e.toString());
+      // print(e.toString());
       showSnackBar(context, e.toString());
     }
 
@@ -70,10 +70,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
           : Scaffold(
               appBar: AppBar(
                 backgroundColor: mobileBackgroundColor,
-                title: Text(user!.account),
+                title: Text(user!.name),
                 actions: [
                   IconButton(
-                    onPressed: () => print('edit'),
+                    onPressed: () {
+                      Navigator.pushNamed(context, EditUserScreen.routeName)
+                          .then(
+                        (_) => getData(),
+                      );
+                    },
                     icon: const Icon(Icons.edit),
                   ),
                   IconButton(
@@ -104,7 +109,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         MainAxisAlignment.spaceEvenly,
                                     children: [
                                       buildStackColumn(
-                                        totalPosts!,
+                                        posts!.length,
                                         'posts',
                                       ),
                                       buildStackColumn(

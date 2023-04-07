@@ -4,7 +4,7 @@ import './user.dart';
 class Post {
   final String id;
   final String title;
-  final User? owner;
+  final String owner;
   final String image;
   final String description;
   final List<dynamic>? likes;
@@ -14,11 +14,11 @@ class Post {
   Post({
     required this.id,
     required this.title,
-    required this.owner,
     required this.image,
     required this.description,
     required this.createdAt,
     required this.updatedAt,
+    required this.owner,
     this.likes,
   });
 
@@ -39,8 +39,9 @@ class Post {
       title: map['title'] ?? '',
       image: map['image'] ?? '',
       description: map['description'] ?? '',
-      // owner: map['owner'] != null ? User.fromMap(map['owner']) : null,
-      owner: User.fromMap(map['owner']),
+      owner: map['owner'] ?? '',
+      // owner:
+      //     map['user'] == null ? null : User.fromJson(jsonEncode(map['owner'])),
       likes: List<Map<String, dynamic>>.from(
         map['likes']?.map(
           (x) => Map<String, dynamic>.from(x),

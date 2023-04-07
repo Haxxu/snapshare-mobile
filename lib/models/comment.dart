@@ -5,7 +5,7 @@ import './user.dart';
 class Comment {
   final String id;
   final String content;
-  final User? owner;
+  final String owner;
   final String post;
   final List<dynamic>? likes;
   final DateTime createdAt;
@@ -36,7 +36,8 @@ class Comment {
       id: map['_id'] ?? '',
       content: map['content'] ?? '',
       post: map['post'] ?? '',
-      owner: map['owner'] != null ? User.fromMap(map['owner']) : null,
+      // owner: map['owner'] != null ? User.fromMap(map['owner']) : null,
+      owner: map['owner'] ?? '',
       likes: List<Map<String, dynamic>>.from(
         map['likes']?.map(
           (x) => Map<String, dynamic>.from(x),

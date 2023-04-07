@@ -150,6 +150,7 @@ class AuthService {
   }
 
   Future<User?> getUserData(BuildContext context) async {
+    User? user;
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       String? token = prefs.getString(_xAuthTokenKey);
@@ -168,9 +169,11 @@ class AuthService {
           Provider.of<AuthManager>(context, listen: false);
       authManager.setUser(jsonEncode(jsonDecode(userRes.body)['data']));
 
-      return User.fromJson(jsonEncode(jsonDecode(userRes.body)['data']));
+      user = User.fromJson(jsonEncode(jsonDecode(userRes.body)['data']));
     } catch (e) {
       print(e);
     }
+
+    return user;
   }
 }

@@ -51,12 +51,13 @@ class PostService {
     }
   }
 
-  Future<List<Post>?> getPostsByUserId({
+  Future<List<Post>> getPostsByUserId({
     required BuildContext context,
     required String userId,
   }) async {
     final String token =
         Provider.of<AuthManager>(context, listen: false).xAuthToken ?? '';
+    List<Post> postList = [];
 
     try {
       http.Response res = await http.get(
@@ -71,59 +72,29 @@ class PostService {
         response: res,
         context: context,
         onSuccess: () {
-          // showSnackBar(context, jsonDecode(res.body)['message']);
+          // print(jsonEncode(jsonDecode(res.body)['data']));
+          List<dynamic> data = jsonDecode(res.body)['data'];
+          for (int i = 0; i < data.length; ++i) {
+            // print(jsonEncode(data[i]['owner']));
+            Post p = Post.fromJson(jsonEncode(data[i]));
+            postList.add(p);
+          }
         },
       );
 
-      Map<String, dynamic> jsonBody = jsonDecode(res.body);
+      // Map<String, dynamic> jsonBody = jsonDecode(res.body);
 
-      List<dynamic> postList = jsonBody['data'];
-
-      // return postList.length;
+      // List<dynamic> postList = jsonBody['data'];
 
       // List<Post> posts = postList.map((json) => Post.fromJson(json)).toList();
       // print(posts);
+
+      // return postList;
     } catch (e) {
       print(e);
       showSnackBar(context, e.toString());
     }
-  }
 
-  Future<int?> getNumbersOfPostsByUserId({
-    required BuildContext context,
-    required String userId,
-  }) async {
-    final String token =
-        Provider.of<AuthManager>(context, listen: false).xAuthToken ?? '';
-
-    try {
-      http.Response res = await http.get(
-        Uri.parse(getPostsByUserIdUrl(userId)),
-        headers: {
-          'Content-Type': 'application/json; charset=UTF-8',
-          'x-auth-token': token,
-        },
-      );
-
-      httpErrorHandle(
-        response: res,
-        context: context,
-        onSuccess: () {
-          // showSnackBar(context, jsonDecode(res.body)['message']);
-        },
-      );
-
-      Map<String, dynamic> jsonBody = jsonDecode(res.body);
-
-      List<dynamic> postList = jsonBody['data'];
-
-      return postList.length;
-
-      // List<Post> posts = postList.map((json) => Post.fromJson(json)).toList();
-      // print(posts);
-    } catch (e) {
-      print(e);
-      showSnackBar(context, e.toString());
-    }
+    return postList;
   }
 }

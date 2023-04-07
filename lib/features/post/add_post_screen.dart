@@ -47,7 +47,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
                   icon: const Icon(Icons.upload),
                   onPressed: () => _selectImage(context),
                 ),
-                Text('Upload Image'),
+                const Text('Upload Image'),
               ],
             ),
           )
@@ -185,7 +185,7 @@ class _AddPostScreenState extends State<AddPostScreen> {
         image: postImageUrl,
       );
     } catch (e) {
-      print(e);
+      // print(e);
       showSnackBar(context, e.toString());
     }
 

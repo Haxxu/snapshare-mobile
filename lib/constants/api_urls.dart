@@ -9,3 +9,7 @@ String createNewPostUrl() {
 String getPostsByUserIdUrl(userId) {
   return '$apiUrl/users/$userId/posts';
 }
+
+String updateUserByUserIdUrl(userid) {
+  return '$apiUrl/users/$userid';
+}
