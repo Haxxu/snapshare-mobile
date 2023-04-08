@@ -38,8 +38,6 @@ class _PostCardState extends State<PostCard> {
   void initState() {
     super.initState();
 
-    authUser = Provider.of<AuthManager>(context, listen: false).user;
-
     checkLikedPost(widget.post.id);
     checkSavedPost(widget.post.id);
     fetchOwnerData(widget.post.owner);
@@ -113,6 +111,7 @@ class _PostCardState extends State<PostCard> {
 
   @override
   Widget build(BuildContext context) {
+    authUser = Provider.of<AuthManager>(context, listen: false).user;
     return Container(
       // color: mobileBackgroundColor,
       margin: const EdgeInsets.symmetric(vertical: 3),
@@ -139,7 +138,7 @@ class _PostCardState extends State<PostCard> {
             ),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
-                return _buildOwnerSection(context, snapshot.data!);
+                return _buildOwnerSection(context, snapshot.data!, authUser!);
               } else if (snapshot.hasError) {
                 return Text('Error: ${snapshot.error}');
               } else {
@@ -288,29 +287,31 @@ class _PostCardState extends State<PostCard> {
                 ),
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.only(top: 8),
+                  padding: const EdgeInsets.only(top: 10),
                   child: RichText(
                     text: TextSpan(
                       style: const TextStyle(color: primaryColor),
                       children: [
                         TextSpan(
                           text: owner?.account ?? '',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
                         ),
                         TextSpan(
                           text: ' ${widget.post.title}',
+                          style: const TextStyle(fontSize: 16),
                         ),
                       ],
                     ),
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  padding: const EdgeInsets.only(top: 10, bottom: 4),
                   child: Text(
                     DateFormat.yMMMd().format(
                       widget.post.createdAt,
                     ),
-                    style: const TextStyle(fontSize: 16, color: secondaryColor),
+                    style: const TextStyle(fontSize: 12, color: secondaryColor),
                   ),
                 ),
               ],
@@ -321,7 +322,7 @@ class _PostCardState extends State<PostCard> {
     );
   }
 
-  Widget _buildOwnerSection(BuildContext context, User owner) {
+  Widget _buildOwnerSection(BuildContext context, User owner, User authUser) {
     return Row(
       children: [
         CircleAvatar(
@@ -356,7 +357,7 @@ class _PostCardState extends State<PostCard> {
                     shrinkWrap: true,
                     children: [
                       Visibility(
-                        visible: owner.id == authUser?.id,
+                        visible: owner.id == authUser.id,
                         child: SimpleDialogOption(
                           padding: const EdgeInsets.symmetric(
                             vertical: 12,
