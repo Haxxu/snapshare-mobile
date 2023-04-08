@@ -1,5 +1,4 @@
 import 'dart:convert';
-import './user.dart';
 
 class Post {
   final String id;

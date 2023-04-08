@@ -24,7 +24,10 @@ class AppTheme {
   }
 
   static ThemeData dark() {
-    return ThemeData.dark()
-        .copyWith(scaffoldBackgroundColor: mobileBackgroundColor);
+    return ThemeData.dark().copyWith(
+      scaffoldBackgroundColor: mobileBackgroundColor,
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+    );
   }
 }

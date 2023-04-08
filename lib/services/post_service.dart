@@ -254,4 +254,97 @@ class PostService {
       showSnackBar(context, e.toString());
     }
   }
+
+  Future<bool> checkSavedPost({
+    required BuildContext context,
+    required String postId,
+  }) async {
+    final String token =
+        Provider.of<AuthManager>(context, listen: false).xAuthToken ?? '';
+    bool isLiked = false;
+
+    try {
+      http.Response res = await http.get(
+        Uri.parse(checksavedPostUrl(postId)),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-auth-token': token,
+        },
+      );
+
+      httpErrorHandle(
+        response: res,
+        context: context,
+        onSuccess: () {
+          // print(jsonEncode(jsonDecode(res.body)['data']));
+          isLiked = jsonDecode(res.body)['data'];
+        },
+      );
+    } catch (e) {
+      print(e);
+      showSnackBar(context, e.toString());
+    }
+
+    return isLiked;
+  }
+
+  void savePost({
+    required BuildContext context,
+    required String postId,
+  }) async {
+    final String token =
+        Provider.of<AuthManager>(context, listen: false).xAuthToken ?? '';
+
+    try {
+      http.Response res = await http.put(
+        Uri.parse(savePostUrl(postId)),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-auth-token': token,
+        },
+        body: jsonEncode({
+          'post': postId,
+        }),
+      );
+
+      httpErrorHandle(
+        response: res,
+        context: context,
+        onSuccess: () {},
+      );
+    } catch (e) {
+      print(e);
+      showSnackBar(context, e.toString());
+    }
+  }
+
+  void unsavePost({
+    required BuildContext context,
+    required String postId,
+  }) async {
+    final String token =
+        Provider.of<AuthManager>(context, listen: false).xAuthToken ?? '';
+
+    try {
+      http.Response res = await http.delete(
+        Uri.parse(unsavePostUrl(postId)),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-auth-token': token,
+        },
+        body: jsonEncode({
+          'post': postId,
+        }),
+      );
+
+      httpErrorHandle(
+        response: res,
+        context: context,
+        onSuccess: () {},
+      );
+    } catch (e) {
+      print(e);
+      showSnackBar(context, e.toString());
+    }
+  }
 }

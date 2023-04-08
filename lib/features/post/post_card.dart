@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import 'package:snapshare_mobile/features/comment/comment_screen.dart';
+import 'package:snapshare_mobile/models/comment.dart';
 import 'package:snapshare_mobile/models/post.dart';
 import 'package:snapshare_mobile/models/user.dart';
 import 'package:snapshare_mobile/providers/auth_manager.dart';
+import 'package:snapshare_mobile/services/comment_service.dart';
 import 'package:snapshare_mobile/services/post_service.dart';
 import 'package:snapshare_mobile/services/user_service.dart';
 import 'package:snapshare_mobile/utils/colors.dart';
@@ -20,9 +24,14 @@ class PostCard extends StatefulWidget {
 class _PostCardState extends State<PostCard> {
   final UserService _userService = UserService();
   final PostService _postService = PostService();
+  final CommentService _commentService = CommentService();
   User? authUser;
+  User? owner;
   bool isLikeAnimting = false;
   bool isLiked = false;
+  bool isSaved = false;
+  int totalLikes = 0;
+  List<Comment> comments = [];
 
   @override
   void initState() {
@@ -31,6 +40,29 @@ class _PostCardState extends State<PostCard> {
     authUser = Provider.of<AuthManager>(context, listen: false).user!;
 
     checkLikedPost(widget.post.id);
+    checkSavedPost(widget.post.id);
+    fetchOwnerData(widget.post.owner);
+    fetchCommentsData(widget.post.id);
+    fetchData();
+  }
+
+  fetchData() async {
+    totalLikes = widget.post.likes?.length ?? 0;
+
+    setState(() {});
+  }
+
+  fetchCommentsData(String postId) async {
+    comments = await _commentService.getCommentsByPostId(
+        context: context, postId: postId);
+
+    setState(() {});
+  }
+
+  fetchOwnerData(String ownerId) async {
+    owner = await _userService.getUserById(context: context, userId: ownerId);
+
+    setState(() {});
   }
 
   checkLikedPost(String postId) async {
@@ -42,7 +74,9 @@ class _PostCardState extends State<PostCard> {
 
   likePost(String postId) async {
     _postService.likePost(context: context, postId: postId);
+
     setState(() {
+      totalLikes++;
       isLiked = true;
     });
   }
@@ -50,14 +84,49 @@ class _PostCardState extends State<PostCard> {
   unlikePost(String postId) async {
     _postService.unlikePost(context: context, postId: postId);
     setState(() {
+      totalLikes--;
       isLiked = false;
+    });
+  }
+
+  checkSavedPost(String postId) async {
+    isSaved =
+        await _postService.checkSavedPost(context: context, postId: postId);
+
+    setState(() {});
+  }
+
+  savePost(String postId) async {
+    _postService.savePost(context: context, postId: postId);
+    setState(() {
+      isSaved = true;
+    });
+  }
+
+  unsavePost(String postId) async {
+    _postService.unsavePost(context: context, postId: postId);
+    setState(() {
+      isSaved = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: mobileBackgroundColor,
+      // color: mobileBackgroundColor,
+      margin: const EdgeInsets.symmetric(vertical: 3),
+      decoration: BoxDecoration(
+        color: mobileBackgroundColor,
+        borderRadius: const BorderRadius.all(Radius.circular(10)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.white.withOpacity(0.05),
+            spreadRadius: 5,
+            blurRadius: 7,
+            offset: const Offset(0, 3), // changes position of shadow
+          ),
+        ],
+      ),
       padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 6),
       child: Column(
         children: [
@@ -144,21 +213,103 @@ class _PostCardState extends State<PostCard> {
                 ),
               ),
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => CommentScreen(postId: widget.post.id),
+                    ),
+                  );
+                },
                 icon: const Icon(
-                  Icons.send,
+                  Icons.comment_outlined,
                 ),
               ),
               Expanded(
                 child: Align(
                   alignment: Alignment.bottomRight,
-                  child: IconButton(
-                    icon: const Icon(Icons.bookmark_border),
-                    onPressed: () {},
+                  child: LikeAnimation(
+                    isAnimating: isSaved,
+                    child: IconButton(
+                      icon: isSaved
+                          ? const Icon(Icons.bookmark)
+                          : const Icon(Icons.bookmark_border),
+                      onPressed: () {
+                        if (!isSaved) {
+                          savePost(widget.post.id);
+                        } else {
+                          unsavePost(widget.post.id);
+                        }
+                      },
+                    ),
                   ),
                 ),
               ),
             ],
+          ),
+
+          // DESCRIPTION AND NUMBER OF COMMENTS
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    DefaultTextStyle(
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium!
+                          .copyWith(fontWeight: FontWeight.w400),
+                      child: Text(
+                        '$totalLikes likes',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 15,
+                    ),
+                    DefaultTextStyle(
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium!
+                          .copyWith(fontWeight: FontWeight.w400),
+                      child: Text(
+                        '${comments.length} comments',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
+                  ],
+                ),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.only(top: 8),
+                  child: RichText(
+                    text: TextSpan(
+                      style: const TextStyle(color: primaryColor),
+                      children: [
+                        TextSpan(
+                          text: owner?.account ?? '',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        TextSpan(
+                          text: ' ${widget.post.title}',
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Text(
+                    DateFormat.yMMMd().format(
+                      widget.post.createdAt,
+                    ),
+                    style: const TextStyle(fontSize: 16, color: secondaryColor),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -196,10 +347,12 @@ class _PostCardState extends State<PostCard> {
               builder: (context) {
                 return Dialog(
                   child: ListView(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shrinkWrap: true,
-                      children: [
-                        SimpleDialogOption(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shrinkWrap: true,
+                    children: [
+                      Visibility(
+                        visible: owner.id == authUser?.id,
+                        child: SimpleDialogOption(
                           padding: const EdgeInsets.symmetric(
                             vertical: 12,
                             horizontal: 16,
@@ -210,18 +363,20 @@ class _PostCardState extends State<PostCard> {
                             Navigator.of(context).pop();
                           },
                         ),
-                        SimpleDialogOption(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 12,
-                            horizontal: 16,
-                          ),
-                          child: const Text('Delete'),
-                          onPressed: () async {
-                            print('Delete post');
-                            Navigator.of(context).pop();
-                          },
-                        )
-                      ]),
+                      ),
+                      SimpleDialogOption(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                          horizontal: 16,
+                        ),
+                        child: const Text('Delete'),
+                        onPressed: () async {
+                          print('Delete post');
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  ),
                 );
               },
             );

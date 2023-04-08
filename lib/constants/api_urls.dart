@@ -39,3 +39,19 @@ String likePostUrl(postId) {
 String unlikePostUrl(postId) {
   return '$apiUrl/me/liked-posts';
 }
+
+String checksavedPostUrl(postId) {
+  return '$apiUrl/me/saved-posts/contains?postId=$postId';
+}
+
+String savePostUrl(postId) {
+  return '$apiUrl/me/saved-posts';
+}
+
+String unsavePostUrl(postId) {
+  return '$apiUrl/me/saved-posts';
+}
+
+String getCommentsByPostIdUrl(postId) {
+  return '$apiUrl/posts/$postId/comments';
+}
