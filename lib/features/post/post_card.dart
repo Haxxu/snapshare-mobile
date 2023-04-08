@@ -15,7 +15,8 @@ import 'package:snapshare_mobile/widgets/like_animation.dart';
 
 class PostCard extends StatefulWidget {
   final Post post;
-  const PostCard({super.key, required this.post});
+  PostCard({super.key, required this.post, this.onDeletePost});
+  Function()? onDeletePost;
 
   @override
   State<PostCard> createState() => _PostCardState();
@@ -37,7 +38,7 @@ class _PostCardState extends State<PostCard> {
   void initState() {
     super.initState();
 
-    authUser = Provider.of<AuthManager>(context, listen: false).user!;
+    authUser = Provider.of<AuthManager>(context, listen: false).user;
 
     checkLikedPost(widget.post.id);
     checkSavedPost(widget.post.id);
@@ -138,7 +139,7 @@ class _PostCardState extends State<PostCard> {
             ),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
-                return _buildOwnerSection(context, snapshot.data);
+                return _buildOwnerSection(context, snapshot.data!);
               } else if (snapshot.hasError) {
                 return Text('Error: ${snapshot.error}');
               } else {
@@ -214,11 +215,15 @@ class _PostCardState extends State<PostCard> {
               ),
               IconButton(
                 onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => CommentScreen(postId: widget.post.id),
-                    ),
-                  );
+                  Navigator.of(context)
+                      .push(
+                        MaterialPageRoute(
+                          builder: (_) => CommentScreen(
+                              postId: widget.post.id,
+                              postOwnerId: widget.post.owner),
+                        ),
+                      )
+                      .then((_) => fetchCommentsData(widget.post.id));
                 },
                 icon: const Icon(
                   Icons.comment_outlined,
@@ -316,12 +321,12 @@ class _PostCardState extends State<PostCard> {
     );
   }
 
-  Widget _buildOwnerSection(BuildContext context, User? owner) {
+  Widget _buildOwnerSection(BuildContext context, User owner) {
     return Row(
       children: [
         CircleAvatar(
           radius: 16,
-          backgroundImage: NetworkImage(owner!.image),
+          backgroundImage: NetworkImage(owner.image),
         ),
         Expanded(
           child: Padding(
@@ -359,21 +364,12 @@ class _PostCardState extends State<PostCard> {
                           ),
                           child: const Text('Delete'),
                           onPressed: () async {
-                            print('Delete post');
+                            if (widget.onDeletePost != null) {
+                              widget.onDeletePost!();
+                            }
                             Navigator.of(context).pop();
                           },
                         ),
-                      ),
-                      SimpleDialogOption(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 12,
-                          horizontal: 16,
-                        ),
-                        child: const Text('Delete'),
-                        onPressed: () async {
-                          print('Delete post');
-                          Navigator.of(context).pop();
-                        },
                       ),
                     ],
                   ),
@@ -381,7 +377,7 @@ class _PostCardState extends State<PostCard> {
               },
             );
           },
-          icon: const Icon(Icons.more_vert),
+          icon: const Icon(Icons.more_horiz),
         ),
       ],
     );

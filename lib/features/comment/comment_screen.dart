@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snapshare_mobile/features/comment/comment_card.dart';
@@ -6,7 +8,9 @@ import 'package:snapshare_mobile/models/comment.dart';
 import 'package:snapshare_mobile/models/user.dart';
 import 'package:snapshare_mobile/providers/auth_manager.dart';
 import 'package:snapshare_mobile/services/comment_service.dart';
+import 'package:snapshare_mobile/services/user_service.dart';
 import 'package:snapshare_mobile/utils/colors.dart';
+import 'package:snapshare_mobile/utils/utils.dart';
 
 class CommentScreen extends StatefulWidget {
   static const String routeName = '/comments';
@@ -14,9 +18,11 @@ class CommentScreen extends StatefulWidget {
   const CommentScreen({
     super.key,
     required this.postId,
+    required this.postOwnerId,
   });
 
   final String postId;
+  final String postOwnerId;
 
   @override
   State<CommentScreen> createState() => _CommentScreenState();
@@ -25,6 +31,7 @@ class CommentScreen extends StatefulWidget {
 class _CommentScreenState extends State<CommentScreen> {
   final TextEditingController _commentController = TextEditingController();
   final CommentService _commentService = CommentService();
+  final UserService _userService = UserService();
   List<Comment> comments = [];
 
   @override
@@ -46,6 +53,31 @@ class _CommentScreenState extends State<CommentScreen> {
     setState(() {});
   }
 
+  createNewComment(String postId, String content) async {
+    Comment? comment = await _commentService.createNewComment(
+        context: context, postId: postId, content: content);
+    if (comment != null) {
+      setState(() {
+        comments.insert(0, comment);
+        _commentController.text = '';
+      });
+    } else {
+      showSnackBar(context, 'Post comment failure');
+    }
+  }
+
+  deleteComment(String commentId) async {
+    bool isDeleted = await _commentService.deleteComment(
+        context: context, commentId: commentId);
+    if (isDeleted) {
+      setState(() {
+        comments.removeWhere((element) => element.id == commentId);
+      });
+    } else {
+      showSnackBar(context, 'Delete comment failure');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final User user = Provider.of<AuthManager>(context).user!;
@@ -57,7 +89,14 @@ class _CommentScreenState extends State<CommentScreen> {
       ),
       body: ListView.builder(
         itemCount: comments.length,
-        itemBuilder: (context, index) => CommentCard(comment: comments[index]),
+        itemBuilder: (context, index) {
+          return CommentCard(
+            comment: comments[index],
+            postOwnerId: widget.postOwnerId,
+            onDeleteComment: () => deleteComment(comments[index].id),
+            key: UniqueKey(),
+          );
+        },
       ),
       bottomNavigationBar: SafeArea(
         child: Container(
@@ -87,8 +126,8 @@ class _CommentScreenState extends State<CommentScreen> {
               InkWell(
                 onTap: () async {
                   if (_commentController.text.trim() != '') {
-                    print('post');
-                    fetchComments(widget.postId);
+                    createNewComment(
+                        widget.postId, _commentController.text.trim());
                   }
                   setState(() {
                     _commentController.text = '';

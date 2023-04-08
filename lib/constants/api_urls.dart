@@ -52,6 +52,31 @@ String unsavePostUrl(postId) {
   return '$apiUrl/me/saved-posts';
 }
 
+String deletePostByIdUrl(String postId) {
+  return '$apiUrl/posts/$postId';
+}
+
+//  COMMENTS
 String getCommentsByPostIdUrl(postId) {
   return '$apiUrl/posts/$postId/comments';
+}
+
+String createNewCommentUrl() {
+  return '$apiUrl/comments';
+}
+
+String deleteCommentByIdUrl(String commentId) {
+  return '$apiUrl/comments/$commentId';
+}
+
+String checkLikedCommentUrl(commentId) {
+  return '$apiUrl/me/liked-comments/contains?commentId=$commentId';
+}
+
+String likeCommentUrl(commentId) {
+  return '$apiUrl/me/liked-comments';
+}
+
+String unlikeCommentUrl(commentId) {
+  return '$apiUrl/me/liked-comments';
 }

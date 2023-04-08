@@ -102,7 +102,7 @@ class PostService {
       final uri = Uri.parse(getRandomPostsUrl());
       final queryParams = {
         'tags': ["random"],
-        'limit': '3'
+        'limit': '5'
       };
       final uriWithQueryParams = uri.replace(queryParameters: queryParams);
 
@@ -129,7 +129,7 @@ class PostService {
       );
 
       final uri1 = Uri.parse(getFollowingUsersPostsByUserIdUrl(userId));
-      final queryParams1 = {'limit': '2'};
+      final queryParams1 = {'limit': '5'};
       final uriWithQueryParams1 = uri1.replace(queryParameters: queryParams1);
 
       http.Response res1 = await http.get(
@@ -346,5 +346,37 @@ class PostService {
       print(e);
       showSnackBar(context, e.toString());
     }
+  }
+
+  Future<bool> deletePost({
+    required BuildContext context,
+    required String postId,
+  }) async {
+    final String token =
+        Provider.of<AuthManager>(context, listen: false).xAuthToken ?? '';
+    bool isDeleted = false;
+
+    try {
+      http.Response res = await http.delete(
+        Uri.parse(deletePostByIdUrl(postId)),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-auth-token': token,
+        },
+      );
+
+      httpErrorHandle(
+        response: res,
+        context: context,
+        onSuccess: () {
+          isDeleted = true;
+        },
+      );
+    } catch (e) {
+      print(e);
+      showSnackBar(context, e.toString());
+    }
+
+    return isDeleted;
   }
 }
