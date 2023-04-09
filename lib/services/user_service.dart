@@ -84,4 +84,169 @@ class UserService {
 
     return user;
   }
+
+  Future<bool> checkFollowUser({
+    required BuildContext context,
+    required String userId,
+  }) async {
+    final String token =
+        Provider.of<AuthManager>(context, listen: false).xAuthToken ?? '';
+    bool isFollowing = false;
+
+    try {
+      http.Response res = await http.get(
+        Uri.parse(checkFollowUserUrl(userId)),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-auth-token': token,
+        },
+      );
+
+      httpErrorHandle(
+        response: res,
+        context: context,
+        onSuccess: () {
+          // print(jsonEncode(jsonDecode(res.body)['data']));
+          isFollowing = jsonDecode(res.body)['data'];
+        },
+      );
+    } catch (e) {
+      print(e);
+      showSnackBar(context, e.toString());
+    }
+
+    return isFollowing;
+  }
+
+  Future<void> followUser({
+    required BuildContext context,
+    required String userId,
+  }) async {
+    final String token =
+        Provider.of<AuthManager>(context, listen: false).xAuthToken ?? '';
+
+    try {
+      http.Response res = await http.put(
+        Uri.parse(followUserUrl()),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-auth-token': token,
+        },
+        body: jsonEncode({
+          'user': userId,
+        }),
+      );
+
+      httpErrorHandle(
+        response: res,
+        context: context,
+        onSuccess: () {},
+      );
+    } catch (e) {
+      print(e);
+      showSnackBar(context, e.toString());
+    }
+  }
+
+  Future<void> unfollowUser({
+    required BuildContext context,
+    required String userId,
+  }) async {
+    final String token =
+        Provider.of<AuthManager>(context, listen: false).xAuthToken ?? '';
+
+    try {
+      http.Response res = await http.delete(
+        Uri.parse(unfollowUserUrl()),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-auth-token': token,
+        },
+        body: jsonEncode({
+          'user': userId,
+        }),
+      );
+
+      httpErrorHandle(
+        response: res,
+        context: context,
+        onSuccess: () {},
+      );
+    } catch (e) {
+      print(e);
+      showSnackBar(context, e.toString());
+    }
+  }
+
+  Future<List<User>> getFollowingByUserId({
+    required BuildContext context,
+    required String userId,
+  }) async {
+    final String token =
+        Provider.of<AuthManager>(context, listen: false).xAuthToken ?? '';
+    List<User> userList = [];
+
+    try {
+      http.Response res = await http.get(
+        Uri.parse(getFollowingByUserIdUrl(userId)),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-auth-token': token,
+        },
+      );
+
+      httpErrorHandle(
+        response: res,
+        context: context,
+        onSuccess: () {
+          List<dynamic> data = jsonDecode(res.body)['data'];
+          for (int i = 0; i < data.length; ++i) {
+            User u = User.fromJson(jsonEncode(data[i]));
+            userList.add(u);
+          }
+        },
+      );
+    } catch (e) {
+      print(e);
+      showSnackBar(context, e.toString());
+    }
+
+    return userList;
+  }
+
+  Future<List<User>> getFollowersByUserId({
+    required BuildContext context,
+    required String userId,
+  }) async {
+    final String token =
+        Provider.of<AuthManager>(context, listen: false).xAuthToken ?? '';
+    List<User> userList = [];
+
+    try {
+      http.Response res = await http.get(
+        Uri.parse(getFollowersByUserIdUrl(userId)),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'x-auth-token': token,
+        },
+      );
+
+      httpErrorHandle(
+        response: res,
+        context: context,
+        onSuccess: () {
+          List<dynamic> data = jsonDecode(res.body)['data'];
+          for (int i = 0; i < data.length; ++i) {
+            User u = User.fromJson(jsonEncode(data[i]));
+            userList.add(u);
+          }
+        },
+      );
+    } catch (e) {
+      print(e);
+      showSnackBar(context, e.toString());
+    }
+
+    return userList;
+  }
 }

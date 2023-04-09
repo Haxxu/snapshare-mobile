@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import 'package:snapshare_mobile/features/comment/comment_screen.dart';
+import 'package:snapshare_mobile/features/user/user_screen.dart';
 import 'package:snapshare_mobile/models/comment.dart';
 import 'package:snapshare_mobile/models/post.dart';
 import 'package:snapshare_mobile/models/user.dart';
@@ -48,6 +49,10 @@ class _PostCardState extends State<PostCard> {
   fetchData() async {
     totalLikes = widget.post.likes?.length ?? 0;
 
+    if (!mounted) {
+      return;
+    }
+
     setState(() {});
   }
 
@@ -55,11 +60,19 @@ class _PostCardState extends State<PostCard> {
     comments = await _commentService.getCommentsByPostId(
         context: context, postId: postId);
 
+    if (!mounted) {
+      return;
+    }
+
     setState(() {});
   }
 
   fetchOwnerData(String ownerId) async {
     owner = await _userService.getUserById(context: context, userId: ownerId);
+
+    if (!mounted) {
+      return;
+    }
 
     setState(() {});
   }
@@ -67,7 +80,9 @@ class _PostCardState extends State<PostCard> {
   checkLikedPost(String postId) async {
     isLiked =
         await _postService.checkLikedPost(context: context, postId: postId);
-
+    if (!mounted) {
+      return;
+    }
     setState(() {});
   }
 
@@ -91,6 +106,10 @@ class _PostCardState extends State<PostCard> {
   checkSavedPost(String postId) async {
     isSaved =
         await _postService.checkSavedPost(context: context, postId: postId);
+
+    if (!mounted) {
+      return;
+    }
 
     setState(() {});
   }
@@ -218,8 +237,9 @@ class _PostCardState extends State<PostCard> {
                       .push(
                         MaterialPageRoute(
                           builder: (_) => CommentScreen(
-                              postId: widget.post.id,
-                              postOwnerId: widget.post.owner),
+                            postId: widget.post.id,
+                            postOwnerId: widget.post.owner,
+                          ),
                         ),
                       )
                       .then((_) => fetchCommentsData(widget.post.id));
@@ -325,9 +345,21 @@ class _PostCardState extends State<PostCard> {
   Widget _buildOwnerSection(BuildContext context, User owner, User authUser) {
     return Row(
       children: [
-        CircleAvatar(
-          radius: 16,
-          backgroundImage: NetworkImage(owner.image),
+        InkWell(
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => UserScreen(
+                  userId: owner.id,
+                  key: UniqueKey(),
+                ),
+              ),
+            );
+          },
+          child: CircleAvatar(
+            radius: 16,
+            backgroundImage: NetworkImage(owner.image),
+          ),
         ),
         Expanded(
           child: Padding(
@@ -336,10 +368,22 @@ class _PostCardState extends State<PostCard> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  owner.name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
+                InkWell(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => UserScreen(
+                          userId: owner.id,
+                          key: UniqueKey(),
+                        ),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    owner.account,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],

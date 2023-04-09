@@ -3,70 +3,63 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:snapshare_mobile/features/post/post_card.dart';
-import 'package:snapshare_mobile/features/user/edit_user_screen.dart';
 import 'package:snapshare_mobile/features/user/followers_screen.dart';
 import 'package:snapshare_mobile/features/user/following_screen.dart';
 import 'package:snapshare_mobile/models/post.dart';
+
 import 'package:snapshare_mobile/models/user.dart';
-import 'package:snapshare_mobile/screens/screens.dart';
-import 'package:snapshare_mobile/services/auth_service.dart';
+import 'package:snapshare_mobile/providers/auth_manager.dart';
 import 'package:snapshare_mobile/services/post_service.dart';
+import 'package:snapshare_mobile/services/user_service.dart';
 import 'package:snapshare_mobile/utils/colors.dart';
 import 'package:snapshare_mobile/utils/utils.dart';
+import 'package:snapshare_mobile/widgets/follow_button.dart';
 
-class ProfileScreen extends StatefulWidget {
-  static const String routeName = '/profile';
-  const ProfileScreen({super.key});
+// ignore: must_be_immutable
+class UserScreen extends StatefulWidget {
+  String userId;
+  UserScreen({super.key, required this.userId});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  State<UserScreen> createState() => UserScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
-  AuthService authService = AuthService();
+class UserScreenState extends State<UserScreen> {
   PostService postService = PostService();
-  User? user;
-  List<Post> posts = [];
-  List<Post> savedPosts = [];
+  UserService userService = UserService();
   bool _isLoading = false;
+  bool _isFollowing = false;
+  List<Post> posts = [];
+  int totalFollowers = 0;
+  int totalFollowing = 0;
+  User? user;
 
   @override
   void initState() {
     super.initState();
 
-    getData();
-    fetchUser();
+    fetchData();
+    checkFollowUser();
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  deletePost(String postId) async {
-    bool isDeleted =
-        await postService.deletePost(context: context, postId: postId);
-    if (isDeleted) {
-      setState(() {
-        posts.removeWhere((element) => element.id == postId);
-      });
-    } else {
-      showSnackBar(context, 'Delete post failure');
-    }
-  }
-
-  getData() async {
+  fetchData() async {
     setState(() {
       _isLoading = true;
     });
 
     try {
-      user = await authService.getUserData(context);
+      user = await userService.getUserById(
+        context: context,
+        userId: widget.userId,
+      );
 
       posts = await postService.getPostsByUserId(
-          context: context, userId: user!.id);
+        context: context,
+        userId: widget.userId,
+      );
 
-      savedPosts = await postService.getSavedPosts(context: context);
+      totalFollowers = user?.followers?.length ?? 0;
+      totalFollowing = user?.following?.length ?? 0;
 
       // print(posts![1].owner);
     } catch (e) {
@@ -85,11 +78,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
 
     try {
-      user = await authService.getUserData(context);
+      user = await userService.getUserById(
+        context: context,
+        userId: widget.userId,
+      );
 
-      // print(posts![1].owner);
+      totalFollowers = user?.followers?.length ?? 0;
+      totalFollowing = user?.following?.length ?? 0;
     } catch (e) {
-      // print(e.toString());
       showSnackBar(context, e.toString());
     }
 
@@ -98,52 +94,60 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
-  logout() async {
-    await Provider.of<AuthManager>(context, listen: false).logout();
+  checkFollowUser() async {
+    _isFollowing = await userService.checkFollowUser(
+      context: context,
+      userId: widget.userId,
+    );
+    setState(() {});
+  }
+
+  followUser(String userId) async {
+    await userService.followUser(context: context, userId: userId);
+
+    setState(() {
+      totalFollowers++;
+      _isFollowing = true;
+    });
+
+    await checkFollowUser();
+  }
+
+  unfollowUser(String userId) async {
+    await userService.unfollowUser(context: context, userId: userId);
+
+    setState(() {
+      totalFollowers--;
+      _isFollowing = false;
+    });
+
+    await checkFollowUser();
   }
 
   @override
   Widget build(BuildContext context) {
+    User? authUser = Provider.of<AuthManager>(context).user;
     return Scaffold(
       body: _isLoading
           ? const Center(
               child: CircularProgressIndicator(),
             )
           : DefaultTabController(
-              length: 2,
+              length: 1,
               child: Scaffold(
                 appBar: AppBar(
                   backgroundColor: mobileBackgroundColor,
                   title: Text(user?.account ?? ''),
-                  actions: [
-                    IconButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, EditUserScreen.routeName)
-                            .then(
-                          (_) {
-                            fetchUser();
-                            getData();
-                          },
-                        );
-                      },
-                      icon: const Icon(Icons.edit),
-                    ),
-                    IconButton(
-                      onPressed: () => logout(),
-                      icon: const Icon(Icons.logout),
-                    ),
-                  ],
                 ),
                 body: Column(
                   children: [
-                    buildInforSection(),
+                    buildInforSection(authUser),
                     const TabBar(
                       indicatorColor: Colors.blue,
                       labelColor: Colors.blue,
                       unselectedLabelColor: Colors.grey,
                       tabs: [
-                        Tab(text: 'My Posts'),
-                        Tab(text: 'Saved Posts'),
+                        Tab(text: 'Posts'),
                       ],
                     ),
                     Expanded(
@@ -154,16 +158,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             itemBuilder: (context, index) {
                               return PostCard(
                                 post: posts[index],
-                                key: UniqueKey(),
-                                onDeletePost: () => deletePost(posts[index].id),
-                              );
-                            },
-                          ),
-                          ListView.builder(
-                            itemCount: savedPosts.length,
-                            itemBuilder: (context, index) {
-                              return PostCard(
-                                post: savedPosts[index],
                                 key: UniqueKey(),
                               );
                             },
@@ -178,7 +172,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget buildInforSection() {
+  Widget buildInforSection(User? authUser) {
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -187,12 +181,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               CircleAvatar(
                 backgroundColor: Colors.grey,
-                backgroundImage: NetworkImage(user!.image),
+                backgroundImage: NetworkImage(user?.image ?? ''),
                 radius: 50,
               ),
               Expanded(
                 child: Column(
                   children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _isFollowing
+                            ? FollowButton(
+                                text: 'Unfollow',
+                                backgroundColor: Colors.white,
+                                textColor: Colors.black,
+                                borderColor: Colors.grey,
+                                function: () async {
+                                  unfollowUser(user!.id);
+                                },
+                              )
+                            : FollowButton(
+                                text: 'Follow',
+                                backgroundColor: Colors.blue,
+                                textColor: Colors.white,
+                                borderColor: Colors.blue,
+                                function: () async {
+                                  followUser(user!.id);
+                                },
+                              ),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 5,
+                    ),
                     Row(
                       mainAxisSize: MainAxisSize.max,
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -207,13 +229,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 .push(
                                   MaterialPageRoute(
                                     builder: (context) =>
-                                        FollowersScreen(userId: user?.id ?? ''),
+                                        FollowersScreen(userId: widget.userId),
                                   ),
                                 )
                                 .then((value) => fetchUser());
                           },
                           child: buildStackColumn(
-                            user?.followers?.length ?? 0,
+                            totalFollowers,
                             'followers',
                           ),
                         ),
@@ -223,13 +245,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 .push(
                                   MaterialPageRoute(
                                     builder: (context) =>
-                                        FollowingScreen(userId: user?.id ?? ''),
+                                        FollowingScreen(userId: widget.userId),
                                   ),
                                 )
                                 .then((value) => fetchUser());
                           },
                           child: buildStackColumn(
-                            user?.following?.length ?? 0,
+                            totalFollowing,
                             'followings',
                           ),
                         ),

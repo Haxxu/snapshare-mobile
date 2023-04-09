@@ -15,6 +15,18 @@ String updateUserByUserIdUrl(userid) {
   return '$apiUrl/users/$userid';
 }
 
+String getSavedPostsUrl() {
+  return '$apiUrl/me/saved-posts';
+}
+
+String getFollowingByUserIdUrl(String userId) {
+  return '$apiUrl/users/$userId/following';
+}
+
+String getFollowersByUserIdUrl(String userId) {
+  return '$apiUrl/users/$userId/followers';
+}
+
 // POST
 String createNewPostUrl() {
   return '$apiUrl/posts';
@@ -79,4 +91,20 @@ String likeCommentUrl(commentId) {
 
 String unlikeCommentUrl(commentId) {
   return '$apiUrl/me/liked-comments';
+}
+
+String searchUrl() {
+  return '$apiUrl/search';
+}
+
+String checkFollowUserUrl(userId) {
+  return '$apiUrl/me/following/contains?userId=$userId';
+}
+
+String followUserUrl() {
+  return '$apiUrl/me/following';
+}
+
+String unfollowUserUrl() {
+  return '$apiUrl/me/following';
 }

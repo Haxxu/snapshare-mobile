@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:jiffy/jiffy.dart';
 import 'package:provider/provider.dart';
+import 'package:snapshare_mobile/features/user/user_screen.dart';
 
 import 'package:snapshare_mobile/models/comment.dart';
 import 'package:snapshare_mobile/models/user.dart';
@@ -88,11 +87,23 @@ class _CommentCardState extends State<CommentCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          CircleAvatar(
-            backgroundImage: NetworkImage(
-              owner?.image ?? '',
+          InkWell(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => UserScreen(
+                    userId: owner!.id,
+                    key: UniqueKey(),
+                  ),
+                ),
+              );
+            },
+            child: CircleAvatar(
+              backgroundImage: NetworkImage(
+                owner?.image ?? '',
+              ),
+              radius: 18,
             ),
-            radius: 18,
           ),
           Expanded(
             child: Padding(

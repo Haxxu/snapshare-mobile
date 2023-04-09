@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 import 'package:snapshare_mobile/models/auth_token.dart';
 import 'package:snapshare_mobile/models/user.dart';
@@ -72,7 +73,7 @@ class AuthManager with ChangeNotifier {
     _user = null;
     _authService.clearSavedAuthToken();
     notifyListeners();
-    print(_xAuthToken);
+    // print(_xAuthToken);
   }
 
   Future<bool> tryAutoLogin() async {

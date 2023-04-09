@@ -17,12 +17,14 @@ class _MainScreenState extends State<MainScreen> {
   int _page = 0;
   late PageController pageController;
   AuthService authService = AuthService();
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
     pageController = PageController();
-    authService.getUserData(context);
+
+    fetchData();
   }
 
   @override
@@ -41,15 +43,31 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
+  fetchData() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    await authService.getUserData(context);
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PageView(
-        physics: const NeverScrollableScrollPhysics(),
-        controller: pageController,
-        onPageChanged: onPageChanged,
-        children: mainScreenItems,
-      ),
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : PageView(
+              physics: const NeverScrollableScrollPhysics(),
+              controller: pageController,
+              onPageChanged: onPageChanged,
+              children: mainScreenItems,
+            ),
       bottomNavigationBar: CupertinoTabBar(
         backgroundColor: mobileBackgroundColor,
         items: [
