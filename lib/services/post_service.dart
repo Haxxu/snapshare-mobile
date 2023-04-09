@@ -135,7 +135,7 @@ class PostService {
       final uri = Uri.parse(getRandomPostsUrl());
       final queryParams = {
         'tags': ["random"],
-        'limit': '5'
+        'limit': '25'
       };
       final uriWithQueryParams = uri.replace(queryParameters: queryParams);
 
@@ -162,7 +162,7 @@ class PostService {
       );
 
       final uri1 = Uri.parse(getFollowingUsersPostsByUserIdUrl(userId));
-      final queryParams1 = {'limit': '5'};
+      final queryParams1 = {'limit': '25'};
       final uriWithQueryParams1 = uri1.replace(queryParameters: queryParams1);
 
       http.Response res1 = await http.get(
