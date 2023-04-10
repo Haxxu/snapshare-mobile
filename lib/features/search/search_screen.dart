@@ -64,7 +64,7 @@ class SearchScreenState extends State<SearchScreen> {
         title: TextFormField(
           controller: _searchController,
           decoration: const InputDecoration(
-            labelText: 'Search for user, posts',
+            labelText: 'Search for user',
           ),
           onChanged: _onSearchChanged,
           // onFieldSubmitted: (String _) {
